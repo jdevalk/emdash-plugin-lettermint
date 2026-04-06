@@ -68,7 +68,7 @@ async function deliverHandler(event: EmailDeliverEvent, ctx: PluginContext) {
 export function lettermintPlugin(): PluginDescriptor {
   return {
     id: "lettermint",
-    version: "0.2.0",
+    version: "0.2.1",
     format: "native",
     entrypoint: new URL("./index.ts", import.meta.url).pathname,
     adminEntry: new URL("./admin.tsx", import.meta.url).pathname,
@@ -82,7 +82,7 @@ export function lettermintPlugin(): PluginDescriptor {
 export function createPlugin() {
   return definePlugin({
     id: "lettermint",
-    version: "0.2.0",
+    version: "0.2.1",
     capabilities: ["email:provide", "network:fetch"],
     allowedHosts: ["api.lettermint.co"],
 
