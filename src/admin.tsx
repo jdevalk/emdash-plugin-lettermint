@@ -54,6 +54,8 @@ function SettingsPage() {
   const [saved, setSaved] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [testing, setTesting] = React.useState(false);
+  const [testResult, setTestResult] = React.useState<{ ok: boolean; message: string } | null>(null);
 
   React.useEffect(() => {
     apiFetch("settings").then(async (res) => {
@@ -78,6 +80,23 @@ function SettingsPage() {
       setError(String(err));
     }
     setSaving(false);
+  };
+
+  const handleTest = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await apiFetch("test");
+      const data = await parseApiResponse<{ ok: boolean; error?: string }>(res);
+      if (data.ok) {
+        setTestResult({ ok: true, message: "Test email sent! Check your inbox." });
+      } else {
+        setTestResult({ ok: false, message: data.error || "Failed to send test email." });
+      }
+    } catch (err) {
+      setTestResult({ ok: false, message: String(err) });
+    }
+    setTesting(false);
   };
 
   const update = (key: string, value: string) => {
@@ -108,6 +127,28 @@ function SettingsPage() {
         {saving ? "Saving..." : "Save Settings"}
       </button>
       {saved && <span style={{ marginLeft: 12, color: "#16a34a", fontSize: "0.875rem" }}>Settings saved!</span>}
+
+      <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid #e5e7eb" }}>
+        <h3 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.5rem" }}>Test Connection</h3>
+        <p style={{ fontSize: "0.75rem", color: "#666", marginBottom: "0.75rem" }}>
+          Send a test email to your configured from address to verify your settings.
+        </p>
+        <button
+          onClick={handleTest}
+          disabled={testing}
+          style={{
+            padding: "0.5rem 1.5rem", borderRadius: 6, background: "#fff",
+            color: "#4a1525", border: "1px solid #4a1525", cursor: testing ? "wait" : "pointer", fontWeight: 500,
+          }}
+        >
+          {testing ? "Sending..." : "Send Test Email"}
+        </button>
+        {testResult && (
+          <span style={{ marginLeft: 12, color: testResult.ok ? "#16a34a" : "#dc2626", fontSize: "0.875rem" }}>
+            {testResult.message}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

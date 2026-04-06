@@ -114,6 +114,44 @@ export function createPlugin() {
           return { ok: true };
         },
       },
+      "test": {
+        handler: async (ctx: RouteContext) => {
+          const entries = await ctx.kv.list("settings:");
+          const settings: Record<string, string> = {};
+          for (const { key, value } of entries) {
+            const k = key.replace("settings:", "");
+            settings[k] = typeof value === "string" ? value : String(value);
+          }
+
+          const apiToken = settings.apiToken;
+          const fromAddress = settings.fromAddress;
+
+          if (!apiToken || !fromAddress) {
+            return { ok: false, error: "Please configure your API token and from address first." };
+          }
+
+          const response = await ctx.http?.fetch("https://api.lettermint.co/v1/email/send", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${apiToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: fromAddress,
+              to: fromAddress,
+              subject: "Lettermint test email from EmDash",
+              text: "If you're reading this, your Lettermint email integration is working!",
+            }),
+          });
+
+          if (!response || !response.ok) {
+            const status = response?.status ?? "no response";
+            return { ok: false, error: `Lettermint API returned ${status}.` };
+          }
+
+          return { ok: true };
+        },
+      },
     },
 
     admin: {
