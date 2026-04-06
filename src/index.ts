@@ -1,5 +1,6 @@
 import { definePlugin } from "emdash";
 import type { PluginContext, PluginDescriptor, RouteContext } from "emdash";
+import { Lettermint } from "lettermint";
 
 interface EmailDeliverEvent {
   message: {
@@ -12,19 +13,24 @@ interface EmailDeliverEvent {
 }
 
 /**
- * Delivers an email via the Lettermint API.
+ * Helper to read plugin settings from KV.
+ */
+async function getSettings(kv: PluginContext["kv"]) {
+  const entries = await kv.list("settings:");
+  const settings: Record<string, string> = {};
+  for (const { key, value } of entries) {
+    const k = key.replace("settings:", "");
+    settings[k] = typeof value === "string" ? value : String(value);
+  }
+  return settings;
+}
+
+/**
+ * Delivers an email via the Lettermint SDK.
  */
 async function deliverHandler(event: EmailDeliverEvent, ctx: PluginContext) {
-  const entries = await ctx.kv.list("settings:");
-  const settings = new Map<string, string>();
-  for (const { key, value } of entries) {
-    if (typeof value === "string") {
-      settings.set(key.replace("settings:", ""), value);
-    }
-  }
-
-  const apiToken = settings.get("apiToken");
-  const fromAddress = settings.get("fromAddress");
+  const settings = await getSettings(ctx.kv);
+  const { apiToken, fromAddress } = settings;
 
   if (!apiToken) {
     ctx.log.error("Lettermint API token not configured");
@@ -36,39 +42,26 @@ async function deliverHandler(event: EmailDeliverEvent, ctx: PluginContext) {
     return;
   }
 
-  const body: Record<string, string> = {
-    from: fromAddress,
-    to: event.message.to,
-    subject: event.message.subject,
-    text: event.message.text,
-  };
+  const client = new Lettermint({ apiToken });
+
+  let email = client.email
+    .from(fromAddress)
+    .to(event.message.to)
+    .subject(event.message.subject)
+    .text(event.message.text);
 
   if (event.message.html) {
-    body.html = event.message.html;
+    email = email.html(event.message.html);
   }
 
-  const response = await ctx.http?.fetch("https://api.lettermint.co/v1/email/send", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response || !response.ok) {
-    ctx.log.error(`Lettermint delivery failed: ${response?.status ?? "no response"}`);
-    return;
-  }
-
-  const result = await response.json();
-  ctx.log.info(`Email delivered via Lettermint: ${result.message_id}`);
+  const response = await email.send();
+  ctx.log.info(`Email delivered via Lettermint: ${response.message_id}`);
 }
 
 export function lettermintPlugin(): PluginDescriptor {
   return {
     id: "lettermint",
-    version: "0.2.1",
+    version: "0.3.0",
     format: "native",
     entrypoint: new URL("./index.ts", import.meta.url).pathname,
     adminEntry: new URL("./admin.tsx", import.meta.url).pathname,
@@ -82,9 +75,8 @@ export function lettermintPlugin(): PluginDescriptor {
 export function createPlugin() {
   return definePlugin({
     id: "lettermint",
-    version: "0.2.1",
-    capabilities: ["email:provide", "network:fetch"],
-    allowedHosts: ["api.lettermint.co"],
+    version: "0.3.0",
+    capabilities: ["email:provide"],
 
     hooks: {
       "email:deliver": {
@@ -96,12 +88,7 @@ export function createPlugin() {
     routes: {
       "settings": {
         handler: async (ctx: RouteContext) => {
-          const entries = await ctx.kv.list("settings:");
-          const settings: Record<string, string> = {};
-          for (const { key, value } of entries) {
-            const k = key.replace("settings:", "");
-            settings[k] = typeof value === "string" ? value : String(value);
-          }
+          const settings = await getSettings(ctx.kv);
           return { settings };
         },
       },
@@ -116,40 +103,27 @@ export function createPlugin() {
       },
       "test": {
         handler: async (ctx: RouteContext) => {
-          const entries = await ctx.kv.list("settings:");
-          const settings: Record<string, string> = {};
-          for (const { key, value } of entries) {
-            const k = key.replace("settings:", "");
-            settings[k] = typeof value === "string" ? value : String(value);
-          }
-
-          const apiToken = settings.apiToken;
-          const fromAddress = settings.fromAddress;
+          const settings = await getSettings(ctx.kv);
+          const { apiToken, fromAddress } = settings;
 
           if (!apiToken || !fromAddress) {
             return { ok: false, error: "Please configure your API token and from address first." };
           }
 
-          const response = await ctx.http?.fetch("https://api.lettermint.co/v1/email/send", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${apiToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              from: fromAddress,
-              to: fromAddress,
-              subject: "Lettermint test email from EmDash",
-              text: "If you're reading this, your Lettermint email integration is working!",
-            }),
-          });
+          try {
+            const client = new Lettermint({ apiToken });
+            await client.email
+              .from(fromAddress)
+              .to(fromAddress)
+              .subject("Lettermint test email from EmDash")
+              .text("If you're reading this, your Lettermint email integration is working!")
+              .send();
 
-          if (!response || !response.ok) {
-            const status = response?.status ?? "no response";
-            return { ok: false, error: `Lettermint API returned ${status}.` };
+            return { ok: true };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            return { ok: false, error: `Lettermint error: ${message}` };
           }
-
-          return { ok: true };
         },
       },
     },

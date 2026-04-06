@@ -1,6 +1,6 @@
 {
   "name": "@jdevalk/emdash-plugin-lettermint",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Lettermint email provider plugin for EmDash CMS",
   "type": "module",
   "exports": {
@@ -17,6 +17,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jdevalk/emdash-plugin-lettermint"
+  },
+  "dependencies": {
+    "lettermint": "^1.0.0"
   },
   "peerDependencies": {
     "emdash": "*"
