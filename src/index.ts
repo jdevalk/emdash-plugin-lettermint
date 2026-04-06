@@ -1,5 +1,5 @@
 import { definePlugin } from "emdash";
-import type { PluginContext } from "emdash";
+import type { PluginContext, PluginDescriptor } from "emdash";
 
 interface EmailDeliverEvent {
   message: {
@@ -63,6 +63,16 @@ async function deliverHandler(event: EmailDeliverEvent, ctx: PluginContext) {
 
   const result = await response.json();
   ctx.log.info(`Email delivered via Lettermint: ${result.message_id}`);
+}
+
+export function lettermintPlugin(): PluginDescriptor {
+  return {
+    id: "lettermint",
+    version: "1.0.0",
+    format: "native",
+    entrypoint: new URL("./index.ts", import.meta.url).pathname,
+    options: {},
+  };
 }
 
 export function createPlugin() {
