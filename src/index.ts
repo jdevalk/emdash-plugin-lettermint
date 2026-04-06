@@ -73,7 +73,7 @@ export function lettermintPlugin(): PluginDescriptor {
     entrypoint: new URL("./index.ts", import.meta.url).pathname,
     adminEntry: new URL("./admin.tsx", import.meta.url).pathname,
     adminPages: [
-      { path: "/settings", label: "Settings", icon: "settings" },
+      { path: "/settings", label: "Lettermint", icon: "settings" },
     ],
     options: {},
   };
@@ -130,7 +130,7 @@ export function createPlugin() {
         },
       },
       pages: [
-        { path: "/settings", label: "Settings", icon: "settings" },
+        { path: "/settings", label: "Lettermint", icon: "settings" },
       ],
     },
   });
