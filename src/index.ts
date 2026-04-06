@@ -1,5 +1,5 @@
 import { definePlugin } from "emdash";
-import type { PluginContext, PluginDescriptor } from "emdash";
+import type { PluginContext, PluginDescriptor, RouteContext } from "emdash";
 
 interface EmailDeliverEvent {
   message: {
@@ -71,6 +71,10 @@ export function lettermintPlugin(): PluginDescriptor {
     version: "0.1.0",
     format: "native",
     entrypoint: new URL("./index.ts", import.meta.url).pathname,
+    adminEntry: new URL("./admin.tsx", import.meta.url).pathname,
+    adminPages: [
+      { path: "/settings", label: "Settings", icon: "settings" },
+    ],
     options: {},
   };
 }
@@ -89,6 +93,29 @@ export function createPlugin() {
       },
     },
 
+    routes: {
+      "settings": {
+        handler: async (ctx: RouteContext) => {
+          const entries = await ctx.kv.list("settings:");
+          const settings: Record<string, string> = {};
+          for (const { key, value } of entries) {
+            const k = key.replace("settings:", "");
+            settings[k] = typeof value === "string" ? value : String(value);
+          }
+          return { settings };
+        },
+      },
+      "settings/save": {
+        handler: async (ctx: RouteContext) => {
+          const { settings } = ctx.input as { settings: Record<string, string> };
+          for (const [key, value] of Object.entries(settings)) {
+            await ctx.kv.set(`settings:${key}`, value);
+          }
+          return { ok: true };
+        },
+      },
+    },
+
     admin: {
       settingsSchema: {
         apiToken: {
@@ -102,6 +129,9 @@ export function createPlugin() {
           description: "Default sender address (e.g. You <you@yourdomain.com>)",
         },
       },
+      pages: [
+        { path: "/settings", label: "Settings", icon: "settings" },
+      ],
     },
   });
 }
