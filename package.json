@@ -15,7 +15,7 @@
   "author": "Joost de Valk",
   "license": "MIT",
   "peerDependencies": {
-    "emdash": ">=0.1.0"
+    "emdash": "*"
   },
   "devDependencies": {
     "emdash": "latest",
