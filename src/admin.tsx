@@ -108,7 +108,7 @@ function SettingsPage() {
 
   return (
     <div style={{ maxWidth: 640, padding: "1.5rem 0" }}>
-      <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1.5rem" }}>Lettermint Settings</h2>
+      <h1 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "1.5rem" }}>Lettermint Settings</h1>
       {FIELDS.map((field) => (
         <Field
           key={field.key}
