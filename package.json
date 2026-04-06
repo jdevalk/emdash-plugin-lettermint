@@ -1,6 +1,6 @@
 {
   "name": "@jdevalk/emdash-plugin-lettermint",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Lettermint email provider plugin for EmDash CMS",
   "type": "module",
   "exports": {
