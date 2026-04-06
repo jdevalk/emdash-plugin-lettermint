@@ -1,5 +1,10 @@
 # emdash-plugin-lettermint
 
+[![CI](https://github.com/jdevalk/emdash-plugin-lettermint/actions/workflows/ci.yml/badge.svg)](https://github.com/jdevalk/emdash-plugin-lettermint/actions/workflows/ci.yml)
+[![Lint](https://github.com/jdevalk/emdash-plugin-lettermint/actions/workflows/lint.yml/badge.svg)](https://github.com/jdevalk/emdash-plugin-lettermint/actions/workflows/lint.yml)
+[![npm](https://img.shields.io/npm/v/@jdevalk/emdash-plugin-lettermint)](https://www.npmjs.com/package/@jdevalk/emdash-plugin-lettermint)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 [Lettermint](https://lettermint.co) email provider plugin for [EmDash CMS](https://emdashcms.com).
 
 Sends all EmDash emails (password resets, notifications, etc.) through Lettermint's EU-based email delivery service.
@@ -46,4 +51,4 @@ The plugin uses only the EmDash plugin API — no Cloudflare-specific code. It w
 
 ## License
 
-MIT
+[MIT](LICENSE)
