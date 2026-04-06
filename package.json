@@ -1,0 +1,24 @@
+{
+  "name": "@jdevalk/emdash-plugin-lettermint",
+  "version": "1.0.0",
+  "description": "Lettermint email provider plugin for EmDash CMS",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "keywords": [
+    "emdash",
+    "emdash-plugin",
+    "email",
+    "lettermint"
+  ],
+  "author": "Joost de Valk",
+  "license": "MIT",
+  "peerDependencies": {
+    "emdash": ">=0.1.0"
+  },
+  "devDependencies": {
+    "emdash": "latest",
+    "typescript": "^5.0.0"
+  }
+}
