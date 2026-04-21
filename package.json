@@ -1,11 +1,19 @@
 {
   "name": "@jdevalk/emdash-plugin-lettermint",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Lettermint email provider plugin for EmDash CMS",
   "type": "module",
+  "main": "dist/index.mjs",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    },
+    "./sandbox": "./dist/sandbox-entry.mjs"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "emdash",
     "emdash-plugin",
@@ -18,14 +26,17 @@
     "type": "git",
     "url": "https://github.com/jdevalk/emdash-plugin-lettermint"
   },
-  "dependencies": {
-    "lettermint": "^1.0.0"
+  "scripts": {
+    "build": "tsdown src/index.ts src/sandbox-entry.ts --format esm --dts --clean",
+    "dev": "tsdown src/index.ts src/sandbox-entry.ts --format esm --dts --watch",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "emdash": "*"
+    "emdash": "^0.6.0"
   },
   "devDependencies": {
     "emdash": "latest",
+    "tsdown": "^0.21.7",
     "typescript": "^5.0.0"
   }
 }
