@@ -37,6 +37,6 @@
   "devDependencies": {
     "emdash": "latest",
     "tsdown": "^0.21.7",
-    "typescript": "^5.0.0"
+    "typescript": "^6.0.3"
   }
 }
